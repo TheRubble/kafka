@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaTest.Producer", "src\KafkaTest.Producer\KafkaTest.Producer.csproj", "{7971F0D3-B2AC-4AD6-90F5-F5588085204F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02A7177B-C0A4-4656-8F90-AB58295F9D98}"
+ProjectSection(SolutionItems) = preProject
+	readme.md = readme.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other", "other", "{AC7E7BB8-D90E-4EE8-9FEE-DC1E355118C7}"
+ProjectSection(SolutionItems) = preProject
+	.developer\docker-compose.yaml = .developer\docker-compose.yaml
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{FBF8660B-EFF2-4E60-9189-F1627B7C1653}"
+ProjectSection(SolutionItems) = preProject
+	FakeData\set1.txt = FakeData\set1.txt
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7971F0D3-B2AC-4AD6-90F5-F5588085204F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7971F0D3-B2AC-4AD6-90F5-F5588085204F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7971F0D3-B2AC-4AD6-90F5-F5588085204F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7971F0D3-B2AC-4AD6-90F5-F5588085204F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FBF8660B-EFF2-4E60-9189-F1627B7C1653} = {AC7E7BB8-D90E-4EE8-9FEE-DC1E355118C7}
+	EndGlobalSection
+EndGlobal
