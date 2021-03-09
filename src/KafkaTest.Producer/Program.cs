@@ -18,12 +18,12 @@ namespace KafkaTest.Producer
             Acks = Acks.All,
             EnableIdempotence = true,
             CompressionType = CompressionType.Snappy,
-            BatchSize = 10
-            
+            BatchNumMessages = 10
         };
         
         static async Task Main(string[] args)
         {
+            // Read using an outbox pattern.
             using (var producer = new ProducerBuilder<string, string>(config).Build())
             {
                 try
@@ -36,10 +36,9 @@ namespace KafkaTest.Producer
                     foreach (var item in dynJson)
                     {
                         Console.WriteLine("{0} {1}\n", item.Id, item.FullName);
-                        producer.Produce(SampleTopic, new Message<string, string> {Key = Guid.NewGuid().ToString(), Value = item.FullName});
+                        producer.Produce(SampleTopic, new Message<string, string> {Key = item.Id, Value = item.FullName});
                     }
                     
-                    await Task.Delay(5000);
                     producer.Flush(TimeSpan.FromSeconds(5));
                 }
                 catch (Exception e)

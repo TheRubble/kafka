@@ -47,3 +47,13 @@ kafka-topics --bootstrap-server localhost:9092 --create --topic customer.data.v1
 ```
 kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic customer.data.v1 --from-beginning --property print.value=true
 ```
+
+## Delete topic
+```
+kafka-topics --bootstrap-server localhost:9092 --delete --topic customer.data.v1
+```
+
+## List all consumer groups
+```
+kafka-consumer-groups --list --bootstrap-server localhost:9092
+```
