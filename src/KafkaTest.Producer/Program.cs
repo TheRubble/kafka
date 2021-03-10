@@ -18,7 +18,7 @@ namespace KafkaTest.Producer
             Acks = Acks.All,
             EnableIdempotence = true,
             CompressionType = CompressionType.Snappy,
-            BatchNumMessages = 10
+            // BatchNumMessages = 10
         };
         
         static async Task Main(string[] args)
@@ -28,17 +28,24 @@ namespace KafkaTest.Producer
             {
                 try
                 {
-                    
-                    using var file = new StreamReader("../../../../../FakeData/set1.txt");
-                    
-                    dynamic dynJson = JsonConvert.DeserializeObject(file.ReadToEnd());
 
-                    foreach (var item in dynJson)
+                    for (int i = 0; i < 1000000; i++)
                     {
-                        Console.WriteLine("{0} {1}\n", item.Id, item.FullName);
-                        producer.Produce(SampleTopic, new Message<string, string> {Key = item.Id, Value = item.FullName});
+                        var bogus = new Bogus.Person();
+                        Console.WriteLine("{0} {1}\n", i, bogus.FirstName);
+                        producer.Produce(SampleTopic, new Message<string, string> {Key = i.ToString(), Value = bogus.FirstName});
                     }
-                    
+
+                    // using var file = new StreamReader("../../../../../FakeData/set1.txt");
+                    //
+                    // dynamic dynJson = JsonConvert.DeserializeObject(file.ReadToEnd());
+                    //
+                    // foreach (var item in dynJson)
+                    // {
+                    //     Console.WriteLine("{0} {1}\n", item.Id, item.FullName);
+                    //     producer.Produce(SampleTopic, new Message<string, string> {Key = item.Id, Value = item.FullName});
+                    // }
+                    //
                     producer.Flush(TimeSpan.FromSeconds(5));
                 }
                 catch (Exception e)

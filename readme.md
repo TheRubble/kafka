@@ -43,7 +43,7 @@ docker exec -it kafka0 bash
 kafka-topics --bootstrap-server localhost:9092 --create --topic customer.data.v1 --replication-factor 1 --partitions 3 --config compression.type=snappy
 ```
 
-## Consumer the topic in the console
+## Consume the topic in the console
 ```
 kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic customer.data.v1 --from-beginning --property print.value=true
 ```
@@ -56,4 +56,9 @@ kafka-topics --bootstrap-server localhost:9092 --delete --topic customer.data.v1
 ## List all consumer groups
 ```
 kafka-consumer-groups --list --bootstrap-server localhost:9092
+```
+
+## Reset the consumer group offset
+```
+kafka-consumer-groups --bootstrap-server 127.0.0.1:9092 --topic customer.data.v1 --to-earliest --group sample-api-group --reset-offsets --execute
 ```
