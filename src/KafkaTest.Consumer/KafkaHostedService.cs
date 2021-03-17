@@ -12,7 +12,7 @@ using StackExchange.Redis;
 
 namespace KafkaTest.SampleApi.DataService
 {
-    public class KafkaHostedService : IHostedService
+    public class KafkaHostedService : BackgroundService
     {
         private readonly string _topic;
         private readonly string _group;
@@ -22,8 +22,8 @@ namespace KafkaTest.SampleApi.DataService
             _topic = topic;
             _group = group;
         }
-        
-        public async Task StartAsync(CancellationToken cancellationToken)
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var conf = new ConsumerConfig
             {
@@ -32,7 +32,7 @@ namespace KafkaTest.SampleApi.DataService
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
             
-            ConnectionMultiplexer muxer = ConnectionMultiplexer.Connect(new ConfigurationOptions
+            ConnectionMultiplexer muxer = await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions
             {
                 EndPoints = { "host.docker.internal:6379" },
             });
@@ -64,10 +64,6 @@ namespace KafkaTest.SampleApi.DataService
                     builder.Close();
                 }
             }
-        }
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace KafkaTest.SecondSampleApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHostedService<KafkaHostedService>((services) => new KafkaHostedService("customer.data.v1","sample-api-group-two"));
+            // services.AddHostedService<KafkaHostedService>((services) => new KafkaHostedService("customer.data.v1","sample-api-group-two"));
             services.AddControllersWithViews();
         }
 
@@ -44,7 +44,6 @@ namespace KafkaTest.SecondSampleApi
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseAuthorization();

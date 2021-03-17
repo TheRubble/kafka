@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using Address = KafkaTest.Shared.Address;
@@ -19,8 +20,7 @@ namespace KafkaTest.Producer
             Acks = Acks.All,
             EnableIdempotence = true,
             CompressionType = CompressionType.Snappy,
-            
-            // BatchNumMessages = 10
+            LingerMs = 100,
         };
         
         static async Task Main(string[] args)
@@ -40,12 +40,12 @@ namespace KafkaTest.Producer
           
             // Read using an outbox pattern.
             using (var producer = new ProducerBuilder<string, Person>(config)
-                .SetValueSerializer(new JsonSerializer<Person>(registry,jsonSerializerConfig))
+                .SetValueSerializer(new JsonSerializer<Person>(registry,jsonSerializerConfig).AsSyncOverAsync())
                 .Build())
             {
                 try
                 {
-                    for (int i = 0; i < 100000; i++)
+                    for (int i = 0; i < 1000000; i++)
                     {
                         var bogus = new Bogus.Person();
 
@@ -61,7 +61,7 @@ namespace KafkaTest.Producer
                         };
                         
                         Console.WriteLine(i);
-                        _ = await producer.ProduceAsync(SampleTopic, new Message<string, Person> {Key = i.ToString(), Value = person});
+                        producer.Produce(SampleTopic, new Message<string, Person> {Key = i.ToString(), Value = person});
                     }
                     
                     producer.Flush(TimeSpan.FromSeconds(5));
