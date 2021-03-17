@@ -2,7 +2,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Confluent.Kafka.SyncOverAsync;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
+using KafkaTest.Shared;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 
 namespace KafkaTest.SampleApi.DataService
@@ -31,11 +36,18 @@ namespace KafkaTest.SampleApi.DataService
             {
                 EndPoints = { "host.docker.internal:6379" },
             });
+            
+            // var schemaRegistryConfig = new SchemaRegistryConfig
+            // {
+            //     Url = "localhost:8081"
+            // };
+            
 
             var redisDb = muxer.GetDatabase();
             
-            using (var builder = new ConsumerBuilder<string, 
-                string>(conf).Build())
+            using (var builder = new ConsumerBuilder<string, Person>(conf)
+                .SetValueDeserializer(new Confluent.SchemaRegistry.Serdes.JsonDeserializer<Person>().AsSyncOverAsync())
+                .Build())
             {
                 builder.Subscribe(_topic);
                 var cancelToken = new CancellationTokenSource();
@@ -44,8 +56,7 @@ namespace KafkaTest.SampleApi.DataService
                     while (true)
                     {
                         var consumer = builder.Consume(cancelToken.Token);
-                        await redisDb.StringSetAsync(consumer.Message.Key, consumer.Message.Value);
-                        // Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
+                        await redisDb.StringSetAsync(consumer.Message.Key, JsonConvert.SerializeObject(consumer.Message.Value));
                     }
                 }
                 catch (Exception)

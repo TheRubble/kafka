@@ -1,7 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
 using Newtonsoft.Json;
 
-namespace KafkaTest.Producer
+namespace KafkaTest.Shared
 {
     public class Person
     {
@@ -15,14 +15,4 @@ namespace KafkaTest.Producer
         public Address Address { get; set; }
         
     }
-    
-    public class Address
-    {
-        [JsonProperty("line1")]
-        public string Line1 { get; set; }
-        
-        [JsonProperty("postCode")]
-        public string PostCode { get; set; }
-    }
-    
 }

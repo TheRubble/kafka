@@ -1,13 +1,10 @@
 ﻿using System;
-using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using Confluent.Kafka.Admin;
-using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
-using Newtonsoft.Json;
+using Address = KafkaTest.Shared.Address;
+using Person = KafkaTest.Shared.Person;
 
 namespace KafkaTest.Producer
 {
@@ -62,6 +59,7 @@ namespace KafkaTest.Producer
                                 PostCode = bogus.Address.ZipCode
                             }
                         };
+                        
                         Console.WriteLine(i);
                         _ = await producer.ProduceAsync(SampleTopic, new Message<string, Person> {Key = i.ToString(), Value = person});
                     }
