@@ -1,8 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using Confluent.Kafka.SyncOverAsync;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
 using Newtonsoft.Json;
 
 namespace KafkaTest.Producer
@@ -18,34 +22,50 @@ namespace KafkaTest.Producer
             Acks = Acks.All,
             EnableIdempotence = true,
             CompressionType = CompressionType.Snappy,
+            
             // BatchNumMessages = 10
         };
         
         static async Task Main(string[] args)
         {
+            var schemaRegistryConfig = new SchemaRegistryConfig
+            {
+                Url = "localhost:8081"
+            };
+
+            var jsonSerializerConfig = new JsonSerializerConfig
+            {
+                BufferBytes = 100
+            };
+
+            
+            var registry = new CachedSchemaRegistryClient(schemaRegistryConfig);
+          
             // Read using an outbox pattern.
-            using (var producer = new ProducerBuilder<string, string>(config).Build())
+            using (var producer = new ProducerBuilder<string, Person>(config)
+                .SetValueSerializer(new JsonSerializer<Person>(registry,jsonSerializerConfig))
+                .Build())
             {
                 try
                 {
-
-                    for (int i = 0; i < 1000000; i++)
+                    for (int i = 0; i < 100000; i++)
                     {
                         var bogus = new Bogus.Person();
-                        Console.WriteLine("{0} {1}\n", i, bogus.FirstName);
-                        producer.Produce(SampleTopic, new Message<string, string> {Key = i.ToString(), Value = bogus.FirstName});
-                    }
 
-                    // using var file = new StreamReader("../../../../../FakeData/set1.txt");
-                    //
-                    // dynamic dynJson = JsonConvert.DeserializeObject(file.ReadToEnd());
-                    //
-                    // foreach (var item in dynJson)
-                    // {
-                    //     Console.WriteLine("{0} {1}\n", item.Id, item.FullName);
-                    //     producer.Produce(SampleTopic, new Message<string, string> {Key = item.Id, Value = item.FullName});
-                    // }
-                    //
+                        var person = new Person
+                        {
+                            FirstName = bogus.FirstName,
+                            LastName = bogus.LastName,
+                            Address = new Address
+                            {
+                                Line1 = bogus.Address.Street,
+                                PostCode = bogus.Address.ZipCode
+                            }
+                        };
+                        Console.WriteLine(i);
+                        _ = await producer.ProduceAsync(SampleTopic, new Message<string, Person> {Key = i.ToString(), Value = person});
+                    }
+                    
                     producer.Flush(TimeSpan.FromSeconds(5));
                 }
                 catch (Exception e)

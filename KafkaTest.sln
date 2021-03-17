@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other", "other", "{AC7E7BB8-D90E-4EE8-9FEE-DC1E355118C7}"
 ProjectSection(SolutionItems) = preProject
 	.developer\docker-compose.yaml = .developer\docker-compose.yaml
+	.developer\docker-compose-redis.yaml = .developer\docker-compose-redis.yaml
+	KafkaCommands.txt = KafkaCommands.txt
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{FBF8660B-EFF2-4E60-9189-F1627B7C1653}"

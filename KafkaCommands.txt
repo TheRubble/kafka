@@ -1,0 +1,1 @@
+kafka-topics --bootstrap-server localhost:9092 --create --topic customer.data.v1 --replication-factor 1 --partitions 3 --config compression.type=snappy

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
 
 namespace KafkaTest.SampleApi.DataService
 {
@@ -17,7 +18,7 @@ namespace KafkaTest.SampleApi.DataService
             _group = group;
         }
         
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             var conf = new ConsumerConfig
             {
@@ -26,7 +27,14 @@ namespace KafkaTest.SampleApi.DataService
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
             
-            using (var builder = new ConsumerBuilder<Ignore, 
+            ConnectionMultiplexer muxer = ConnectionMultiplexer.Connect(new ConfigurationOptions
+            {
+                EndPoints = { "host.docker.internal:6379" },
+            });
+
+            var redisDb = muxer.GetDatabase();
+            
+            using (var builder = new ConsumerBuilder<string, 
                 string>(conf).Build())
             {
                 builder.Subscribe(_topic);
@@ -36,7 +44,8 @@ namespace KafkaTest.SampleApi.DataService
                     while (true)
                     {
                         var consumer = builder.Consume(cancelToken.Token);
-                        Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
+                        await redisDb.StringSetAsync(consumer.Message.Key, consumer.Message.Value);
+                        // Console.WriteLine($"Message: {consumer.Message.Value} received from {consumer.TopicPartitionOffset}");
                     }
                 }
                 catch (Exception)
@@ -44,7 +53,6 @@ namespace KafkaTest.SampleApi.DataService
                     builder.Close();
                 }
             }
-            return Task.CompletedTask;
         }
         public Task StopAsync(CancellationToken cancellationToken)
         {

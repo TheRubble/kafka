@@ -1,0 +1,17 @@
+version: '3'
+services:
+  redis-server:
+    image: "redis:4-alpine3.8"
+    ports:
+      - "6379:6379"
+  redis-server-second-api:
+    image: "redis:4-alpine3.8"
+    ports:
+      - "6380:6379"
+  redis-insight:
+    image: "redislabs/redisinsight:latest"
+    ports:
+      - "8100:8001"
+    volumes:
+      - ./redisinsight:/db
+  
