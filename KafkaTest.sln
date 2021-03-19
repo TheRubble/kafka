@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other", "other", "{AC7E7BB8-D90E-4EE8-9FEE-DC1E355118C7}"
 ProjectSection(SolutionItems) = preProject
 	.developer\docker-compose.yaml = .developer\docker-compose.yaml
-	.developer\docker-compose-redis.yaml = .developer\docker-compose-redis.yaml
 	KafkaCommands.txt = KafkaCommands.txt
 EndProjectSection
 EndProject
@@ -26,6 +25,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaTest.Consumer", "src\KafkaTest.Consumer\KafkaTest.Consumer.csproj", "{F65D6A43-70AE-4249-A867-0B8427B10E60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaTest.Shared", "src\KafkaTest.Shared\KafkaTest.Shared.csproj", "{B0FF1F0E-834C-4C74-9446-9710E97DE40F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaTest.AvroSchemas", "src\KafkaTest.AvroSchemas\KafkaTest.AvroSchemas.csproj", "{E8917D2A-036A-4868-AAD8-C69FEC797ACA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +54,10 @@ Global
 		{B0FF1F0E-834C-4C74-9446-9710E97DE40F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0FF1F0E-834C-4C74-9446-9710E97DE40F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0FF1F0E-834C-4C74-9446-9710E97DE40F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8917D2A-036A-4868-AAD8-C69FEC797ACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8917D2A-036A-4868-AAD8-C69FEC797ACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8917D2A-036A-4868-AAD8-C69FEC797ACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8917D2A-036A-4868-AAD8-C69FEC797ACA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FBF8660B-EFF2-4E60-9189-F1627B7C1653} = {AC7E7BB8-D90E-4EE8-9FEE-DC1E355118C7}

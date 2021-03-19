@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
-using KafkaTest.Shared;
+using KafkaTest.AvroSchemas;
+using KafkaTest.Consumer;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -20,9 +21,12 @@ namespace KafkaTest.SampleApi.Controllers
             var redisDb = muxer.GetDatabase();
 
             var result = await redisDb.StringGetAsync(id);
+            
+            
+            
             if (!string.IsNullOrEmpty(result))
             {
-                return Ok(JsonConvert.DeserializeObject<Person>(result));    
+                return Ok(JsonConvert.DeserializeObject<UserDataTransferObject>(result));    
             }
 
             return NotFound();

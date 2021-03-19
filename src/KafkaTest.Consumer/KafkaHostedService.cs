@@ -5,6 +5,8 @@ using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using KafkaTest.AvroSchemas;
+using KafkaTest.Consumer;
 using KafkaTest.Shared;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -37,16 +39,18 @@ namespace KafkaTest.SampleApi.DataService
                 EndPoints = { "host.docker.internal:6379" },
             });
             
-            // var schemaRegistryConfig = new SchemaRegistryConfig
-            // {
-            //     Url = "localhost:8081"
-            // };
+            var schemaRegistryConfig = new SchemaRegistryConfig
+            {
+                Url = "localhost:8081"
+            };
+            
+            var registry = new CachedSchemaRegistryClient(schemaRegistryConfig);
             
 
             var redisDb = muxer.GetDatabase();
             
-            using (var builder = new ConsumerBuilder<string, Person>(conf)
-                .SetValueDeserializer(new Confluent.SchemaRegistry.Serdes.JsonDeserializer<Person>().AsSyncOverAsync())
+            using (var builder = new ConsumerBuilder<string, User>(conf)
+                .SetValueDeserializer(new Confluent.SchemaRegistry.Serdes.AvroDeserializer<User>(registry).AsSyncOverAsync())
                 .Build())
             {
                 builder.Subscribe(_topic);
@@ -56,7 +60,7 @@ namespace KafkaTest.SampleApi.DataService
                     while (true)
                     {
                         var consumer = builder.Consume(cancelToken.Token);
-                        await redisDb.StringSetAsync(consumer.Message.Key, JsonConvert.SerializeObject(consumer.Message.Value));
+                        await redisDb.StringSetAsync(consumer.Message.Key, JsonConvert.SerializeObject(UserDataTransferObject.ToDTO(consumer.Message.Value)), TimeSpan.MaxValue);
                     }
                 }
                 catch (Exception)

@@ -8,6 +8,7 @@
         <PackageReference Include="Confluent.Kafka" Version="1.6.2" />
         <PackageReference Include="Confluent.SchemaRegistry.Serdes.Json" Version="1.6.2" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="1.6.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -16,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\KafkaTest.AvroSchemas\KafkaTest.AvroSchemas.csproj" />
       <ProjectReference Include="..\KafkaTest.Shared\KafkaTest.Shared.csproj" />
     </ItemGroup>
     

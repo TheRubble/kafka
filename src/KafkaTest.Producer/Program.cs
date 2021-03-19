@@ -4,6 +4,7 @@ using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using KafkaTest.AvroSchemas;
 using Address = KafkaTest.Shared.Address;
 using Person = KafkaTest.Shared.Person;
 
@@ -23,14 +24,14 @@ namespace KafkaTest.Producer
             LingerMs = 100,
         };
         
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             var schemaRegistryConfig = new SchemaRegistryConfig
             {
                 Url = "localhost:8081"
             };
 
-            var jsonSerializerConfig = new JsonSerializerConfig
+            var jsonSerializerConfig = new AvroSerializerConfig
             {
                 BufferBytes = 100
             };
@@ -39,29 +40,26 @@ namespace KafkaTest.Producer
             var registry = new CachedSchemaRegistryClient(schemaRegistryConfig);
           
             // Read using an outbox pattern.
-            using (var producer = new ProducerBuilder<string, Person>(config)
-                .SetValueSerializer(new JsonSerializer<Person>(registry,jsonSerializerConfig).AsSyncOverAsync())
+            using (var producer = new ProducerBuilder<string, User >(config)
+                .SetValueSerializer(new AvroSerializer<User>(registry,jsonSerializerConfig).AsSyncOverAsync())
                 .Build())
             {
                 try
                 {
-                    for (int i = 0; i < 1000000; i++)
+                    for (int i = 0; i < 100000; i++)
                     {
                         var bogus = new Bogus.Person();
 
-                        var person = new Person
+                        var person = new User
                         {
-                            FirstName = bogus.FirstName,
-                            LastName = bogus.LastName,
-                            Address = new Address
-                            {
-                                Line1 = bogus.Address.Street,
-                                PostCode = bogus.Address.ZipCode
-                            }
+                            favorite_color = bogus.Random.Word(),
+                            favorite_number = bogus.Random.Int(0,1000),
+                            hourly_rate = decimal.Round(bogus.Random.Decimal(0,100),2),
+                            name = bogus.FullName
                         };
                         
                         Console.WriteLine(i);
-                        producer.Produce(SampleTopic, new Message<string, Person> {Key = i.ToString(), Value = person});
+                        producer.Produce(SampleTopic, new Message<string, User> {Key = i.ToString(), Value = person});
                     }
                     
                     producer.Flush(TimeSpan.FromSeconds(5));

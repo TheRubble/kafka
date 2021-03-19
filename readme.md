@@ -26,6 +26,12 @@ Another difference is that tasks returned by ProduceAsync compete on thread pool
 - Consider linger to increase batch performance and the compression.
 - Set retries etc, timeout is per operation it's across them all.
 
+## Avro tools
+
+```
+dotnet tool install --global Apache.Avro.Tools
+```
+
 ## Docker
 
 Export the host IP :

@@ -55,6 +55,9 @@ services:
     environment:
       SCHEMAREGISTRY_URL: http://kafka-schema-registry:8081/
       PROXY: "true"
+      ALLOW_GLOBAL : "true"
+      ALLOW_DELETION : "true"
+      READONLY_MODE : "false"
     depends_on:
       - kafka-schema-registry
 
@@ -152,3 +155,15 @@ services:
     environment:
       HTTP_PORT: 8000
       AUTO_CONNECT_CONNECTION_STRING: zoo1:2181
+
+  redis-server:
+    image: "redis:4-alpine3.8"
+    ports:
+      - "6379:6379"
+
+  redis-insight:
+    image: "redislabs/redisinsight:latest"
+    ports:
+      - "8100:8001"
+    volumes:
+      - ./redisinsight:/db
