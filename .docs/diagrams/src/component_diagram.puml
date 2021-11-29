@@ -1,0 +1,64 @@
+@startuml
+
+@startuml
+
+
+package "Problem Domain" {
+  component "WebAPI" as ASPNETApp
+  component "GRPC" as GRPC
+  component "Application Services" as AppServices
+  component "Domain (AggregateRoot)" as AggregateRoot
+  
+  ASPNETApp -- AppServices
+  GRPC -- AppServices
+  AppServices -- AggregateRoot
+ 
+
+  package "Infrastructure" as Infra{
+    database "EventStore" as EventStore
+    database "MongoDB" as ProjectionStore
+    component "Watcher" as Watcher
+    component "ProjectionA" as ProjectionA 
+    component "ProjectionB" as ProjectionB
+    
+    EventStore <--> Watcher
+    [Redis] <--> Watcher  
+    Watcher --> ProjectionA
+    Watcher --> ProjectionB
+
+    ProjectionA --> ProjectionStore
+    ProjectionB --> ProjectionStore
+  }
+
+
+  
+  AppServices --> EventStore
+  AppServices --> ProjectionStore
+}
+
+package "Enterprise" {
+  
+  [SignalR]
+  [Kafka]
+}
+
+
+package "Customer Domain" {
+  [CustomerConsumer]
+}
+
+package "Policy Domain" {
+  [PolicyConsumer]
+}
+
+
+Kafka <--> CustomerConsumer
+Kafka <--> PolicyConsumer
+
+CustomerConsumer <--> SignalR
+PolicyConsumer <--> SignalR
+
+Watcher --> Kafka
+@enduml
+
+@enduml

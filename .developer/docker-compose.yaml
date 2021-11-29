@@ -1,26 +1,34 @@
-version: '2.1'
+version: '3.8'
+volumes:
+  full-stack_kafka1-data:
+  full-stack_zoo1-data:
+  full-stack_zoo1-log:
 
 services:
   zoo1:
-    image: zookeeper:3.4.9
-    restart: unless-stopped
+    image: confluentinc/cp-zookeeper:6.2.1
     hostname: zoo1
+    container_name: zoo1
     ports:
       - "2181:2181"
     environment:
-      ZOO_MY_ID: 1
-      ZOO_PORT: 2181
-      ZOO_SERVERS: server.1=zoo1:2888:3888
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zoo1:2888:3888
     volumes:
-      - ./full-stack/zoo1/data:/data
-      - ./full-stack/zoo1/datalog:/datalog
-
+      - type: volume
+        source: full-stack_zoo1-data
+        target: /data
+      - type: volume
+        source: full-stack_zoo1-log
+        target: /datalog
 
   kafka1:
-    image: confluentinc/cp-kafka:6.1.0
+    image: confluentinc/cp-kafka:6.2.1
     hostname: kafka1
     ports:
       - "9092:9092"
+      - "9999:9999"
     environment:
       KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
@@ -29,13 +37,19 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - ./full-stack/kafka1/data:/var/lib/kafka/data
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
     depends_on:
       - zoo1
+    volumes:
+      - type: volume
+        source: full-stack_kafka1-data
+        target: /var/lib/kafka/data
 
   kafka-schema-registry:
-    image: confluentinc/cp-schema-registry:6.1.0
+    image: confluentinc/cp-schema-registry:6.2.1
     hostname: kafka-schema-registry
     ports:
       - "8081:8081"
@@ -47,22 +61,9 @@ services:
       - zoo1
       - kafka1
 
-  schema-registry-ui:
-    image: landoop/schema-registry-ui:0.9.5
-    hostname: kafka-schema-registry-ui
-    ports:
-      - "8001:8000"
-    environment:
-      SCHEMAREGISTRY_URL: http://kafka-schema-registry:8081/
-      PROXY: "true"
-      ALLOW_GLOBAL : "true"
-      ALLOW_DELETION : "true"
-      READONLY_MODE : "false"
-    depends_on:
-      - kafka-schema-registry
-
+  
   kafka-rest-proxy:
-    image: confluentinc/cp-kafka-rest:6.1.0
+    image: confluentinc/cp-kafka-rest:6.2.1
     hostname: kafka-rest-proxy
     ports:
       - "8082:8082"
@@ -77,22 +78,9 @@ services:
       - kafka1
       - kafka-schema-registry
 
-  kafka-topics-ui:
-    image: landoop/kafka-topics-ui:0.9.4
-    hostname: kafka-topics-ui
-    ports:
-      - "8000:8000"
-    environment:
-      KAFKA_REST_PROXY_URL: "http://kafka-rest-proxy:8082/"
-      PROXY: "true"
-    depends_on:
-      - zoo1
-      - kafka1
-      - kafka-schema-registry
-      - kafka-rest-proxy
-
+  
   kafka-connect:
-    image: confluentinc/cp-kafka-connect:6.1.0
+    image: confluentinc/cp-kafka-connect:6.2.1
     hostname: kafka-connect
     ports:
       - "8083:8083"
@@ -115,7 +103,7 @@ services:
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
-      CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars,/usr/share/confluent-hub-components'
     volumes:
       - ./connectors:/etc/kafka-connect/jars/
     depends_on:
@@ -123,20 +111,17 @@ services:
       - kafka1
       - kafka-schema-registry
       - kafka-rest-proxy
+    command:
+      - bash
+      - -c
+      - |
+        confluent-hub install --no-prompt debezium/debezium-connector-mysql:latest
+        confluent-hub install --no-prompt confluentinc/kafka-connect-datagen:0.4.0
+        /etc/confluent/docker/run
 
-  kafka-connect-ui:
-    image: landoop/kafka-connect-ui:0.9.7
-    hostname: kafka-connect-ui
-    ports:
-      - "8003:8000"
-    environment:
-      CONNECT_URL: "http://kafka-connect:8083/"
-      PROXY: "true"
-    depends_on:
-      - kafka-connect
-
+  
   ksqldb-server:
-    image: confluentinc/cp-ksqldb-server:6.1.0
+    image: confluentinc/cp-ksqldb-server:6.2.1
     hostname: ksqldb-server
     ports:
       - "8088:8088"
@@ -155,15 +140,3 @@ services:
     environment:
       HTTP_PORT: 8000
       AUTO_CONNECT_CONNECTION_STRING: zoo1:2181
-
-  redis-server:
-    image: "redis:4-alpine3.8"
-    ports:
-      - "6379:6379"
-
-  redis-insight:
-    image: "redislabs/redisinsight:latest"
-    ports:
-      - "8100:8001"
-    volumes:
-      - ./redisinsight:/db
