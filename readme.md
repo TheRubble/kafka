@@ -32,6 +32,12 @@ Another difference is that tasks returned by ProduceAsync compete on thread pool
 dotnet tool install --global Apache.Avro.Tools
 ```
 
+Generate a file from a schema. {Kafka.Namespace:CsharpNamespace}
+
+```csharp
+avrogen -s .\Customer.avsc . --namespace KafkaTest.AvroSchemas:k.a
+```
+
 ## Docker
 
 Export the host IP (From the .developer folder) :
