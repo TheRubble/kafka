@@ -41,32 +41,31 @@ namespace KafkaTest.SampleApi.DataService
             
             var schemaRegistryConfig = new SchemaRegistryConfig
             {
-                Url = "localhost:8081"
+                Url = "localhost:8081",
             };
+
+            
             
             var registry = new CachedSchemaRegistryClient(schemaRegistryConfig);
             
 
             var redisDb = muxer.GetDatabase();
+
+            using var builder = new ConsumerBuilder<string, User>(conf)
+                .SetValueDeserializer(new AvroDeserializer<User>(registry).AsSyncOverAsync()).Build();
             
-            using (var builder = new ConsumerBuilder<string, User>(conf)
-                .SetValueDeserializer(new Confluent.SchemaRegistry.Serdes.AvroDeserializer<User>(registry).AsSyncOverAsync())
-                .Build())
+            builder.Subscribe(_topic);
+            try
             {
-                builder.Subscribe(_topic);
-                var cancelToken = new CancellationTokenSource();
-                try
+                while (true)
                 {
-                    while (true)
-                    {
-                        var consumer = builder.Consume(cancelToken.Token);
-                        await redisDb.StringSetAsync(consumer.Message.Key, JsonConvert.SerializeObject(UserDataTransferObject.ToDTO(consumer.Message.Value)), TimeSpan.MaxValue);
-                    }
+                    var consumer = builder.Consume(stoppingToken);
+                    await redisDb.StringSetAsync(consumer.Message.Key, JsonConvert.SerializeObject(UserDataTransferObject.ToDTO(consumer.Message.Value)), TimeSpan.MaxValue);
                 }
-                catch (Exception)
-                {
-                    builder.Close();
-                }
+            }
+            catch (Exception)
+            {
+                builder.Close();
             }
         }
     }

@@ -34,14 +34,33 @@ dotnet tool install --global Apache.Avro.Tools
 
 ## Docker
 
-Export the host IP :
+Export the host IP (From the .developer folder) :
 ```
 $env:DOCKER_HOST_IP = 'host.docker.internal'
+
+# Create
+docker compose -f .\docker-compose.yaml -f .\dock-compose-other-tools.yaml up --remove-orphans
+
+# Destroy
+docker compose -f .\docker-compose.yaml -f .\dock-compose-other-tools.yaml down --volumes
+
 ```
+
 
 Shell into the container to the console:
 ```
 docker exec -it kafka0 bash
+```
+
+## Redis Explorer
+
+```csharp
+http://localhost:8100/
+```
+## Kafka Explorer
+
+```csharp
+http://localhost:9001/
 ```
 
 ## Create topic
